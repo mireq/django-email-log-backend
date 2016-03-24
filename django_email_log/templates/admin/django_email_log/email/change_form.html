@@ -1,0 +1,83 @@
+{% extends "admin/change_form.html" %}
+
+{% block field_sets %}
+	<fieldst class="module aligned">
+		{% with object=adminform.form.instance %}
+			<h2>{{ object.subject }}</h2>
+			<div class="form-row field-subject">
+				<label>Adresát:</label>
+				<p>{{ object.email_to }}</p>
+			</div>
+			<div class="form-row field-subject">
+				<label>Odoslané:</label>
+				<p>{{ object.date_sent|date:"SHORT_DATETIME_FORMAT" }}</p>
+			</div>
+			<div class="form-row field-subject">
+				<label>Úspešné</label>
+				<p>{{ object.success|yesno }}</p>
+			</div>
+			<div class="form-row field-subject">
+				<label>Správa:</label>
+
+				<ul id="alternatives_switch" class="nav nav-tabs">
+					{% spaceless %}
+					{% for ctype, alternative in object.parsed_message.alternatives_annotated %}
+						<li>
+							<a href="#alternative-{{ forloop.counter }}">{{ ctype }}</a>
+						</li>
+					{% endfor %}
+					<li>
+						<a href="#data" class="cms-btn-group">data</a>
+					</li>
+					{% endspaceless %}
+					<!--- cms-btn-active -->
+				</ul>
+
+				<div id="alternatives">
+					{% for ctype, alternative in object.parsed_message.alternatives_annotated %}
+						<iframe id="alternative-{{ forloop.counter }}" class="alternative" style="width: 100%; height: 500px" src="{% url "django_email_log_attachment" "alternative" object.pk forloop.counter %}">
+						</iframe>
+					{% endfor %}
+					<pre id="data" class="alternative">{{ object.message_data }}</pre>
+				</div>
+			</div>
+		{% endwith %}
+	</fieldst>
+{% endblock %}
+
+{% block object-tools %}
+{% endblock %}
+
+{% block admin_change_form_document_ready %}
+	{{ block.super }}
+	<script type="text/javascript">
+		(function($) {
+			$(document).ready(function() {
+				var alternative = '';
+
+				var selectAlternative = function(link) {
+					$('#alternatives_switch li').removeClass('active');
+					var linkBtn = $('#alternatives_switch a[href=' + link + ']');
+					$(linkBtn[0].parentNode).addClass('active');
+					$('#alternatives .alternative').css({'display': 'none'});
+					$('#alternatives .alternative' + link).css({'display': 'block'});
+				};
+
+				$('#alternatives_switch a').each(function() {
+					var txt = $(this).text();
+					if (txt === 'text/html') {
+						alternative = $(this).attr('href');
+					}
+					if (alternative === '') {
+						alternative = $(this).attr('href');
+					}
+				});
+				$('#alternatives_switch a').on('click', function(event) {
+					selectAlternative($(this).attr('href'));
+					event.preventDefault();
+				});
+				selectAlternative(alternative);
+			});
+		})(django.jQuery);
+	</script>
+{% endblock %}
