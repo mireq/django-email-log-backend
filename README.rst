@@ -24,3 +24,11 @@ Settings
 	EMAIL_LOG_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 Emails are forwarded to `EMAIL_LOG_BACKEND`.
+
+.. code:: python
+
+	# urls.py
+	urlpatterns = patterns('',
+		# ...
+		url(r'^django-email-log/', include('django_email_log.urls')),
+	)
