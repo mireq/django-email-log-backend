@@ -6,6 +6,7 @@ import email
 from django.core.mail import EmailMultiAlternatives
 from django.db import models
 from django.utils import timezone
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -23,6 +24,7 @@ class EmailManager(models.Manager):
 		return db_message
 
 
+@python_2_unicode_compatible
 class Email(models.Model):
 	objects = EmailManager()
 
@@ -35,7 +37,7 @@ class Email(models.Model):
 	date_sent = models.DateTimeField(verbose_name=_("date sent"), editable=False, db_index=True)
 	success = models.BooleanField(verbose_name=_("successfully sent"), default=False, db_index=True)
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.subject
 
 	class Meta:
