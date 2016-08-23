@@ -52,7 +52,7 @@ class Email(models.Model):
 
 	@property
 	def parsed_message(self):
-		msg = email.message_from_string(self.message_data.encode('utf-8'))
+		msg = email.message_from_string(self.message_data)
 		parts = {
 			'body': None,
 			'attachments': [],
