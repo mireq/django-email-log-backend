@@ -6,7 +6,7 @@ import email
 from django.core.mail import EmailMultiAlternatives
 from django.db import models
 from django.utils import timezone
-from django.utils.encoding import python_2_unicode_compatible
+from django.utils.encoding import python_2_unicode_compatible, force_str
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -52,7 +52,7 @@ class Email(models.Model):
 
 	@property
 	def parsed_message(self):
-		msg = email.message_from_string(self.message_data)
+		msg = email.message_from_string(force_str(self.message_data))
 		parts = {
 			'body': None,
 			'attachments': [],
