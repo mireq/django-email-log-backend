@@ -28,10 +28,10 @@ Emails are forwarded to `EMAIL_LOG_BACKEND`.
 .. code:: python
 
 	# urls.py
-	urlpatterns = patterns('',
+	urlpatterns = [
 		# ...
 		url(r'^django-email-log/', include('django_email_log.urls')),
-	)
+	]
 
 .. image:: https://raw.github.com/wiki/mireq/django-email-log-backend/msg1.png
 
