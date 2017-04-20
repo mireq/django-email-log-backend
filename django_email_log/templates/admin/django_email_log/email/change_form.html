@@ -57,7 +57,7 @@
 
 				var selectAlternative = function(link) {
 					$('#alternatives_switch li').removeClass('active');
-					var linkBtn = $('#alternatives_switch a[href=' + link + ']');
+					var linkBtn = $('#alternatives_switch a[href="' + link + '"]');
 					$(linkBtn[0].parentNode).addClass('active');
 					$('#alternatives .alternative').css({'display': 'none'});
 					$('#alternatives .alternative' + link).css({'display': 'block'});
