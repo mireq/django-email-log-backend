@@ -7,6 +7,10 @@ Install
 
 `pip install 'git+https://github.com/mireq/django-email-log-backend.git'`
 
+or
+
+`pip install -e 'git+https://github.com/mireq/django-email-log-backend.git#egg=django_email_log_backend'`
+
 Usage
 -----
 
