@@ -1,5 +1,6 @@
 include LICENSE
 include README.rst
 include django_email_log/templates/admin/django_email_log/email/change_form.html
+include django_email_log/static/django_email_log/css/admin.css
 include django_email_log/locale/*/LC_MESSAGES/django.mo
 include django_email_log/locale/*/LC_MESSAGES/django.po
