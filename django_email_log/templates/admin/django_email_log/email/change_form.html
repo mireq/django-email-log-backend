@@ -4,7 +4,7 @@
 
 {% block extrastyle %}
 {{ block.super }}
-<link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "django_email_log/css/admin.css" %}{% endblock %}" />
+<link rel="stylesheet" type="text/css" href="{% static "django_email_log/css/admin.css" %}" />
 {% endblock %}
 
 {% block field_sets %}
