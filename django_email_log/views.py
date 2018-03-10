@@ -11,7 +11,7 @@ from .models import Email
 class AttachmentView(View):
 	def test_func(self):
 		user = self.request.user
-		return user.is_authenticated() and user.is_staff and user.has_perm('django_email_log.change_email')
+		return user.is_authenticated and user.is_staff and user.has_perm('django_email_log.change_email')
 
 	def get(self, request, **kwargs):
 		if not self.test_func():
