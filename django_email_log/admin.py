@@ -20,5 +20,8 @@ class EmailAdmin(admin.ModelAdmin):
 	get_recipients.allow_tags = True
 	get_recipients.admin_order_field = "email_from"
 
+	def has_add_permission(self, request): # pylint: disable=unused-argument
+		return False
+
 
 admin.site.register(Email, EmailAdmin)
