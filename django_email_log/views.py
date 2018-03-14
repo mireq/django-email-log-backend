@@ -31,8 +31,14 @@ class AttachmentView(View):
 			content_type += '; charset=' + part.get_content_charset()
 
 		part_data = part.get_payload(decode=True)
-		if content_type.startswith('text/') and part.get_content_charset() == 'utf-8':
-			part_data = part_data.decode('raw-unicode-escape')
+		charset = part.get_content_charset('iso-8859-1')
+		if charset == 'utf-8':
+			try:
+				part_data = part_data.decode(charset)
+			except UnicodeDecodeError:
+				part_data = part_data.decode('raw-unicode-escape')
+		else:
+			part_data = part_data.decode(charset, 'replace')
 		response = HttpResponse(part_data, content_type=content_type)
 		if kwargs['object_type'] == 'attachment':
 			response['Content-Disposition'] = 'attachment; filename="%s"' % part.get_filename()
