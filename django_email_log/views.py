@@ -18,27 +18,27 @@ class AttachmentView(View):
 			return HttpResponseForbidden()
 		email = get_object_or_404(Email, pk=kwargs['pk'])
 		msg = email.parsed_message
-		number = int(kwargs['nr']) - 1
-		if kwargs['object_type'] == 'attachment':
-			parts = msg['attachments']
-		else:
-			parts = msg['alternatives']
-		if number >= len(parts):
+		number = int(kwargs['nr'])
+		if number > len(msg['parts']):
 			raise Http404()
-		part = parts[number]
+		part = msg['parts'][number]
 		content_type = part.get_content_type()
 		if part.get_content_charset():
 			content_type += '; charset=' + part.get_content_charset()
 
 		part_data = part.get_payload(decode=True)
-		charset = part.get_content_charset('iso-8859-1')
+		charset = part.get_content_charset('iso-8859-1' if part.get_content_maintype() == 'text' else None)
 		if charset == 'utf-8':
 			try:
 				part_data = part_data.decode(charset)
 			except UnicodeDecodeError:
 				part_data = part_data.decode('raw-unicode-escape')
 		else:
-			part_data = part_data.decode(charset, 'replace')
+			if charset:
+				part_data = part_data.decode(charset, 'replace')
+		if part.get_content_type() == 'text/html':
+			for cid, part in msg['parts_cid'].items():
+				part_data = part_data.replace('cid:' + cid, part['alternative_url'])
 		response = HttpResponse(part_data, content_type=content_type)
 		if kwargs['object_type'] == 'attachment':
 			response['Content-Disposition'] = 'attachment; filename="%s"' % part.get_filename()

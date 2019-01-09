@@ -8,6 +8,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, force_str
 from django.utils.translation import ugettext_lazy as _
+from django.urls import reverse
 
 
 class EmailManager(models.Manager):
@@ -56,23 +57,59 @@ class Email(models.Model):
 		parts = {
 			'body': None,
 			'attachments': [],
+			'attachments_annotated': [],
 			'alternatives': [],
 			'alternatives_annotated': [],
+			'parts': [],
+			'parts_cid': {},
 			'headers': dict(msg),
 		}
-		for part in msg.walk():
-			if part.get_content_maintype() == 'multipart':
-				continue
-			if 'attachment' in part.get('Content-Disposition', ''):
-				parts['attachments'].append(part)
-			else:
-				if part.get_content_type() == 'text/plain' and parts['body'] is None:
-					parts['body'] = part.get_payload(decode=True)
-					setattr(part, 'is_body', True)
-				parts['alternatives'].append(part)
+		if msg.is_multipart():
+			for i, part in enumerate(msg.get_payload()):
+				attachments, alternatives = self.__decode_part(part)
+				if i == 0:
+					parts['alternatives'] += attachments
+					parts['alternatives'] += alternatives
+				else:
+					parts['attachments'] += attachments
+					parts['alternatives'] += alternatives
+		else:
+			attachments, alternatives = self.__decode_part(msg)
+			parts['attachments'] += attachments
+			parts['alternatives'] += alternatives
+
+		for part in parts['attachments']:
+			parts['attachments_annotated'].append((part.get_content_type(), part))
 		for part in parts['alternatives']:
 			parts['alternatives_annotated'].append((part.get_content_type(), part))
+		for i, part in enumerate(msg.walk()):
+			parts['parts'].append(part)
+			kwargs = {'pk': self.pk, 'nr': i}
+			kwargs['object_type'] = 'attachment'
+			part['attachment_url'] = reverse('django_email_log_attachment', kwargs=kwargs)
+			kwargs['object_type'] = 'alternative'
+			part['alternative_url'] = reverse('django_email_log_attachment', kwargs=kwargs)
+			cid = part.get('Content-ID')
+			if cid:
+				if cid.startswith('<') and cid.endswith('>'):
+					cid = cid[1:-1]
+				parts['parts_cid'][cid] = part
+
+		body = dict(parts['alternatives_annotated']).get('text/plain')
+		if body:
+			parts['body'] = part.get_payload(decode=True)
+			setattr(part, 'is_body', True)
 		return parts
+
+	def __decode_part(self, part):
+		attachments = []
+		alternatives = []
+		if part.is_multipart():
+			for payload in part.get_payload():
+				alternatives.append(payload)
+		else:
+			attachments.append(part)
+		return attachments, alternatives
 
 	@property
 	def email_message(self):
