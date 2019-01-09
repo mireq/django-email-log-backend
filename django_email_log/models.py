@@ -106,9 +106,16 @@ class Email(models.Model):
 		alternatives = []
 		if part.is_multipart():
 			for payload in part.get_payload():
-				alternatives.append(payload)
+				if 'attachment' in payload.get('Content-Disposition', ''):
+					attachments.append(payload)
+				else:
+					alternatives.append(payload)
+
 		else:
-			attachments.append(part)
+			if 'attachment' in part.get('Content-Disposition', ''):
+				attachments.append(part)
+			else:
+				alternatives.append(part)
 		return attachments, alternatives
 
 	@property
