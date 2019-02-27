@@ -18,14 +18,14 @@ class EmailBackend(BaseEmailBackend):
 		for message in email_messages:
 			message.connection = self.connection
 			if hasattr(message, 'model_instance'):
-				sent = message.send()
+				sent = message.send() or 0
 				num_sent += sent
 				if sent > 0:
 					message.model_instance.success = True
 					message.model_instance.save()
 			else:
 				email = Email.objects.create_from_message(message)
-				sent = message.send()
+				sent = message.send() or 0
 				num_sent += sent
 				if sent > 0:
 					email.success = True
