@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import email
 
 from django.core.mail import EmailMultiAlternatives
 from django.db import models
-from django.utils import timezone
-from django.utils.encoding import python_2_unicode_compatible, force_str
-from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.encoding import force_text
+from django.utils.translation import gettext_lazy as _
 
 
 class EmailManager(models.Manager):
@@ -25,7 +23,6 @@ class EmailManager(models.Manager):
 		return db_message
 
 
-@python_2_unicode_compatible
 class Email(models.Model):
 	objects = EmailManager()
 
@@ -53,7 +50,7 @@ class Email(models.Model):
 
 	@property
 	def parsed_message(self):
-		msg = email.message_from_string(force_str(self.message_data))
+		msg = email.message_from_string(force_text(self.message_data))
 		parts = {
 			'body': None,
 			'attachments': [],
