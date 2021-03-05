@@ -24,7 +24,10 @@ class EmailBackend(BaseEmailBackend):
 			else:
 				email = Email.objects.create_from_message(message)
 				sent = message.send() or 0
-				num_sent += sent
+				try:
+					num_sent += sent
+				except Exception:
+					sent = 0
 				if sent > 0:
 					email.success = True
 					email.save()
