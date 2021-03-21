@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from collections import namedtuple
+import cgi
 import email
 
 from django.core.mail import EmailMultiAlternatives
@@ -7,6 +9,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.translation import pgettext_lazy
+
+
+PartInfo = namedtuple('PartInfo', ['part', 'content_type', 'content_disposition', 'filename', 'cid', 'get_absolute_url'])
 
 
 class EmailManager(models.Manager):
@@ -62,70 +67,56 @@ class Email(models.Model):
 
 	@property
 	def parsed_message(self):
-		msg = email.message_from_string(force_str(self.message_data))
-		parts = {
-			'body': None,
-			'attachments': [],
-			'attachments_annotated': [],
-			'alternatives': [],
-			'alternatives_annotated': [],
-			'parts': [],
-			'parts_cid': {},
-			'headers': dict(msg),
-		}
-		if msg.is_multipart():
-			for i, part in enumerate(msg.get_payload()):
-				attachments, alternatives = self.__decode_part(part)
-				if i == 0:
-					parts['alternatives'] += attachments
-					parts['alternatives'] += alternatives
-				else:
-					parts['attachments'] += attachments
-					parts['alternatives'] += alternatives
-		else:
-			attachments, alternatives = self.__decode_part(msg)
-			parts['attachments'] += attachments
-			parts['alternatives'] += alternatives
+		return email.message_from_string(force_str(self.message_data))
 
-		for part in parts['attachments']:
-			parts['attachments_annotated'].append((part.get_content_type(), part))
-		for part in parts['alternatives']:
-			parts['alternatives_annotated'].append((part.get_content_type(), part))
-		for i, part in enumerate(msg.walk()):
-			parts['parts'].append(part)
-			kwargs = {'pk': self.pk, 'nr': i}
-			kwargs['object_type'] = 'attachment'
-			part['attachment_url'] = reverse('django_email_log_attachment', kwargs=kwargs)
-			kwargs['object_type'] = 'alternative'
-			part['alternative_url'] = reverse('django_email_log_attachment', kwargs=kwargs)
-			cid = part.get('Content-ID')
-			if cid:
-				if cid.startswith('<') and cid.endswith('>'):
-					cid = cid[1:-1]
-				parts['parts_cid'][cid] = part
+	@property
+	def payload_tree(self):
+		return self.__preprocessed_message['tree']
 
-		body = dict(parts['alternatives_annotated']).get('text/plain')
-		if body:
-			parts['body'] = part.get_payload(decode=True)
-			setattr(part, 'is_body', True)
-		return parts
+	@property
+	def payload_list(self):
+		return self.__preprocessed_message['parts']
 
-	def __decode_part(self, part):
-		attachments = []
-		alternatives = []
+	@property
+	def alternatives(self):
+		return self.__preprocessed_message['alternatives']
+
+	@property
+	def __preprocessed_message(self):
+		state = {'tree': {}, 'parts': [], 'alternatives': []}
+		self.__build_tree(self.parsed_message, state['tree'], state, add_to_alternative=True)
+		return state
+
+	def __build_tree(self, part, tree, state, add_to_alternative):
+		parts, alternatives = state['parts'], state['alternatives']
+		content_disposition, params = cgi.parse_header(part.get('Content-Disposition', ''))
+		filename = params.get('filename')
+		content_disposition = content_disposition or 'inline'
+		content_type = part.get_content_type()
+		cid = part.get('Content-ID')
+		if cid:
+			if cid.startswith('<') and cid.endswith('>'):
+				cid = cid[1:-1]
+		tree['filename'] = filename
+		tree['content_type'] = content_type
+		tree['content_disposition'] = content_disposition
+		tree['index'] = len(parts)
+		tree['cid'] = len(parts)
+		tree['get_absolute_url'] = reverse('django_email_log_attachment', args=('attachment', self.pk, tree['index']))
+		part_info = PartInfo(part, content_type, content_disposition, filename, cid, tree['get_absolute_url'])
+		parts.append(part_info)
 		if part.is_multipart():
+			tree['children'] = []
+			add_to_alternative = len(alternatives) == 0
 			for payload in part.get_payload():
-				if 'attachment' in payload.get('Content-Disposition', ''):
-					attachments.append(payload)
-				else:
-					alternatives.append(payload)
-
+				subtree = {}
+				tree['children'].append(subtree)
+				self.__build_tree(payload, subtree, state, add_to_alternative)
 		else:
-			if 'attachment' in part.get('Content-Disposition', ''):
-				attachments.append(part)
-			else:
-				alternatives.append(part)
-		return attachments, alternatives
+			if add_to_alternative and part_info.content_disposition == 'inline':
+				alternatives.append(part_info)
+			tree['payload'] = part.get_payload()
+		return part_info
 
 	@property
 	def email_message(self):
