@@ -28,9 +28,11 @@ class AttachmentView(View):
 		if part.get_content_charset():
 			content_type += '; charset=' + part.get_content_charset()
 
-		if part.is_multipart():
+		if part.is_multipart() or 'nr' not in kwargs:
 			part_data = part.as_string()
 			content_type = 'text/plain'
+			if part.get_content_charset():
+				content_type += '; charset=' + part.get_content_charset()
 		else:
 			part_data = part.get_payload(decode=True)
 			charset = part.get_content_charset('iso-8859-1' if part.get_content_maintype() == 'text' else None)
