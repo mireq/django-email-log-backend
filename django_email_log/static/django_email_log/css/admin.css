@@ -106,3 +106,35 @@ body.frame pre.alternative, body.frame iframe.alternative {
 	background: white;
 	color: black;
 }
+
+.app-django_email_log .field-get_subject a {
+	font-weight: normal;
+}
+
+.app-django_email_log .field-get_subject a strong {
+	font-weight: bold;
+}
+
+.app-django_email_log .field-get_subject .status {
+	display: inline-block;
+	content: '';
+	margin-right: 1em;
+	vertical-align: middle;
+	width: 1em;
+	height: 1em;
+	border-radius: 0.5em;
+	background: #888;
+	box-shadow: inset 0px .5em .5em rgba(255, 255, 255, .5);
+}
+
+.app-django_email_log .field-get_subject .status.success {
+	background-color: #11aa22;
+}
+
+.app-django_email_log .field-get_subject .status.fail {
+	background-color: #ee1111;
+}
+
+.app-django_email_log .field-get_subject .status.received {
+	background-color: #5555dd;
+}
