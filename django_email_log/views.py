@@ -27,10 +27,7 @@ class AttachmentView(View):
 		part_data = part.get_payload(decode=True)
 		charset = part.get_content_charset('iso-8859-1' if part.get_content_maintype() == 'text' else None)
 		if charset == 'utf-8':
-			try:
-				part_data = part_data.decode(charset)
-			except UnicodeDecodeError:
-				part_data = part_data.decode('raw-unicode-escape')
+			part_data = part_data.decode('raw-unicode-escape')
 		else:
 			if charset:
 				part_data = part_data.decode(charset, 'replace')
