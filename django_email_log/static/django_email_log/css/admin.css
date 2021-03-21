@@ -1,3 +1,10 @@
+body.frame {
+	padding: 0;
+	margin: 0;
+	font-family: sans-serif;
+	height: 100%;
+}
+
 .email-log-parts ul {
 	padding: 0;
 	margin: 0 0 0 1em;
@@ -40,7 +47,7 @@
 	display: inline;
 }
 
-#alternatives_switch li a {
+#alternatives_switch li a, #alternative_open {
 	float: left;
 	line-height: 32px;
 	vertical-align: middle;
@@ -53,8 +60,14 @@
 	outline: 0;
 }
 
-#alternatives_switch li a:hover {
+#alternatives_switch li a:hover, #alternative_open:hover {
 	color: #ffffff !important;
+}
+
+#alternative_open {
+	float: right;
+	border-radius: 5px;
+	display: none;
 }
 
 #alternatives_switch li:first-child a {
@@ -75,8 +88,6 @@
 	background: #417690;
 }
 
-/*
-
 pre.alternative, iframe.alternative {
 	border: none;
 	background: #f8f8f8;
@@ -84,5 +95,14 @@ pre.alternative, iframe.alternative {
 	padding: 10px;
 	margin: 0;
 	width: 100%;
+	height: 800px;
+	box-sizing: border-box;
 }
-*/
+
+body.frame pre.alternative, body.frame iframe.alternative {
+	height: 100%;
+	position: absolute;
+	border: none;
+	background: white;
+	color: black;
+}

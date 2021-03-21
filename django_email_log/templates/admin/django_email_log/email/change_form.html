@@ -14,6 +14,8 @@
 {{ block.super }}
 {% with object=adminform.form.instance %}
 {% if object.pk %}
+	<a id="alternative_open" href="#">{% trans "Open in new window" context "email message" %}</a>
+
 	<ul id="alternatives_switch" class="nav nav-tabs">
 		{% spaceless %}
 			{% for ctype, alternative in object.parsed_message.alternatives_annotated %}
@@ -24,7 +26,7 @@
 					<a href="{{ alternative.alternative_url }}">{% if alternative.filename %}{{ alternative.filename }}{% else %}{{ alternative.content_type }}{% endif %}</a>
 				</li>
 			{% endfor %}
-			<li><a href="#data">data</a></li>
+			<li><a href="{% url "django_email_log_attachment" "alternative" object.pk %}">data</a></li>
 		{% endspaceless %}
 	</ul>
 
@@ -38,4 +40,106 @@
 	</fieldset>
 {% endif %}
 {% endwith %}
+
+<script charset="utf-8">
+//<![CDATA[
+
+(function() {
+
+var ap = Array.prototype;
+
+function bindEvent(element, name, fn) {
+	element.addEventListener(name, fn, false);
+}
+
+function unbindEvent(element, name, fn) {
+	element.removeEventListener(name, fn, false);
+}
+
+function q(selector, element) {
+	if (element === undefined) {
+		element = document;
+	}
+	return element.querySelector(selector);
+}
+
+function qa(sel, element, include_self) {
+	if (element === undefined) {
+		element = document;
+	}
+	var elements = ap.slice.call(element.querySelectorAll(sel));
+	if (include_self) {
+		if (element.matches(sel)) {
+			elements.unshift(element);
+		}
+	}
+	return elements;
+}
+
+
+function onSwitchClicked(e) {
+	if (e.which !== 1) {
+		return;
+	}
+	var target = e.target;
+	if (!target.getAttribute('href')) {
+		return;
+	}
+	showAlternative(target);
+	e.preventDefault();
+}
+
+
+function showAlternative(link) {
+	var url = link.getAttribute('href');
+	qa('.active', alternativesSwitch).forEach(function(element) { element.classList.remove('active'); });
+	link.parentNode.classList.add('active');
+	iframe.style.display = 'block';
+	iframe.setAttribute('src', url);
+	alternativeOpen.setAttribute('href', url);
+	alternativeOpen.style.display = 'block';
+}
+
+
+function onOpenClicked(e) {
+	if (e.which !== 1) {
+		return;
+	}
+	e.preventDefault();
+	var url = alternativeOpen.getAttribute('href');
+	var win = window.open(undefined, '', 'width=400,height=600');
+	win.document.write('<!DOCTYPE html><html><head><title></title><link rel="stylesheet" type="text/css" href="{% static "django_email_log/css/admin.css" %}" /></head><body class="frame"></body></html>');
+
+	var iframe = win.document.createElement('iframe');
+	win.document.body.appendChild(iframe);
+	iframe.className = 'alternative';
+	iframe.setAttribute('sandbox', '');
+	iframe.setAttribute('src', url);
+}
+
+
+var alternativesSwitch = q("#alternatives_switch");
+var alternativeOpen = q("#alternative_open");
+var firstAlternative = alternativesSwitch.firstElementChild;
+
+var alternativeContainer = document.createElement('div');
+var iframe = document.createElement('iframe');
+iframe.style.display = 'none';
+iframe.className = 'alternative';
+iframe.setAttribute('sandbox', '');
+alternativeContainer.appendChild(iframe);
+
+alternativesSwitch.parentNode.insertBefore(alternativeContainer, alternativesSwitch.nextSibling);
+
+if (firstAlternative !== null) {
+	showAlternative(firstAlternative.firstElementChild);
+}
+bindEvent(alternativesSwitch, 'click', onSwitchClicked);
+bindEvent(alternativeOpen, 'click', onOpenClicked);
+
+
+}());
+
+//]]>
+</script>
 {% endblock %}
