@@ -3,3 +3,4 @@ __pycache__
 *.py~
 *.swp
 *.mo
+/django_email_log_backend.egg-info/
