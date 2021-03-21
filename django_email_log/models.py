@@ -11,7 +11,7 @@ from django.utils.encoding import force_str
 from django.utils.translation import pgettext_lazy
 
 
-PartInfo = namedtuple('PartInfo', ['part', 'content_type', 'content_disposition', 'filename', 'cid', 'get_absolute_url'])
+PartInfo = namedtuple('PartInfo', ['part', 'content_type', 'content_disposition', 'filename', 'cid', 'absolute_url', 'alternative_url'])
 
 
 class EmailManager(models.Manager):
@@ -102,8 +102,9 @@ class Email(models.Model):
 		tree['content_disposition'] = content_disposition
 		tree['index'] = len(parts)
 		tree['cid'] = len(parts)
-		tree['get_absolute_url'] = reverse('django_email_log_attachment', args=('attachment', self.pk, tree['index']))
-		part_info = PartInfo(part, content_type, content_disposition, filename, cid, tree['get_absolute_url'])
+		tree['absolute_url'] = reverse('django_email_log_attachment', args=('attachment', self.pk, tree['index']))
+		tree['alternative_url'] = reverse('django_email_log_attachment', args=('alternative', self.pk, tree['index']))
+		part_info = PartInfo(part, content_type, content_disposition, filename, cid, tree['absolute_url'], tree['alternative_url'])
 		parts.append(part_info)
 		if part.is_multipart():
 			tree['children'] = []
