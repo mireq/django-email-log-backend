@@ -26,7 +26,6 @@ class compile_translations(Command):
 		from django.core.management import call_command
 
 		curdir = os.getcwd()
-		os.chdir(os.path.realpath('wtshop'))
 		call_command('compilemessages')
 		os.chdir(curdir)
 
