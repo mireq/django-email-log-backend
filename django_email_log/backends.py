@@ -28,6 +28,6 @@ class EmailBackend(BaseEmailBackend):
 					num_sent += sent
 				except Exception:
 					sent = 0
-				message.model_instance.status = Email.STATUS_SUCCESS if sent > 0 else Email.STATUS_FAIL
+				email.status = Email.STATUS_SUCCESS if sent > 0 else Email.STATUS_FAIL
 				email.save()
 		return num_sent
