@@ -8,7 +8,7 @@ from .models import Email
 
 class EmailBackend(BaseEmailBackend):
 	def __init__(self, **kwargs):
-		super(EmailBackend, self).__init__(**kwargs)
+		super().__init__(**kwargs)
 		self.connection = get_connection(settings.EMAIL_LOG_BACKEND, **kwargs)
 
 	def send_messages(self, email_messages):
@@ -18,9 +18,9 @@ class EmailBackend(BaseEmailBackend):
 			if hasattr(message, 'model_instance'):
 				sent = message.send() or 0
 				num_sent += sent
-				if sent > 0:
-					message.model_instance.success = True
-					message.model_instance.save()
+				message.model_instance.status = Email.STATUS_SUCCESS if sent > 0 else Email.STATUS_FAIL
+				message.model_instance.save()
+
 			else:
 				email = Email.objects.create_from_message(message)
 				sent = message.send() or 0
@@ -28,7 +28,6 @@ class EmailBackend(BaseEmailBackend):
 					num_sent += sent
 				except Exception:
 					sent = 0
-				if sent > 0:
-					email.success = True
-					email.save()
+				message.model_instance.status = Email.STATUS_SUCCESS if sent > 0 else Email.STATUS_FAIL
+				email.save()
 		return num_sent

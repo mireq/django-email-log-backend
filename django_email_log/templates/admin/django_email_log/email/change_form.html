@@ -7,106 +7,20 @@
 <link rel="stylesheet" type="text/css" href="{% static "django_email_log/css/admin.css" %}" />
 {% endblock %}
 
+{% block object-tools %}{% endblock %}
+
 {% block field_sets %}
-	<fieldst class="module aligned">
-		{% with object=adminform.form.instance %}
-			<h2>{{ object.subject }}</h2>
-			<div class="form-row field-subject">
-				<label>Adresát:</label>
-				<p>{{ object.email_to }}</p>
-			</div>
-			<div class="form-row field-subject">
-				<label>Odoslané:</label>
-				<p>{{ object.date_sent|date:"SHORT_DATETIME_FORMAT" }}</p>
-			</div>
-			<div class="form-row field-subject">
-				<label>Úspešné</label>
-				<p>{{ object.success|yesno }}</p>
-			</div>
-			<div class="form-row field-subject">
-				<label>Správa:</label>
-
-				<ul id="alternatives_switch" class="nav nav-tabs">
-					{% spaceless %}
-					{% for ctype, alternative in object.parsed_message.alternatives_annotated %}
-						<li>
-							<a href="#alternative-{{ forloop.counter }}" data-alternative="{{ ctype }}">{{ ctype }}</a>
-						</li>
-					{% endfor %}
-					<li>
-						<a href="#data">data</a>
-					</li>
-					{% endspaceless %}
-					<!--- cms-btn-active -->
-				</ul>
-
-				<div id="alternatives">
-					{% for ctype, alternative in object.parsed_message.alternatives_annotated %}
-						<iframe id="alternative-{{ forloop.counter }}" class="alternative" style="width: 100%; height: 500px" src="{{ alternative.alternative_url }}">
-						</iframe>
-					{% endfor %}
-					<pre id="data" class="alternative">{{ object.message_data }}</pre>
-				</div>
-
-				<div class="attachments">
-					{% if object.parsed_message.attachments_annotated %}
-						<ul>
-							{% for ctype, attachment in object.parsed_message.attachments_annotated %}
-								<li><a href="{{ attachment.attachment_url }}">{{ ctype }}</a></li>
-							{% endfor %}
-						</ul>
-					{% endif %}
-				</div>
-			</div>
-		{% endwith %}
-	</fieldst>
-
-	<script type="text/javascript">
-//<![CDATA[
-	var i, len, tab, tabLink;
-	var alternativesSwitch = document.getElementById('alternatives_switch');
-	var loadOnStart = '';
-
-	var tabs = alternativesSwitch.getElementsByTagName('a');
-
-	var alternativeLinkClicked = function() {
-		alternativeLinkActivated(this.getAttribute('href'));
-		return false;
-	};
-
-	var alternativeLinkActivated = function(link) {
-		for (var i = 0, len = tabs.length; i < len; i++) {
-			tab = tabs[i];
-			tabLink = tab.getAttribute('href');
-			if (tabLink === link) {
-				tab.parentNode.className = 'active';
-				document.getElementById(tabLink.substr(1)).style.display = 'block';
-			}
-			else {
-				tab.parentNode.className = '';
-				document.getElementById(tabLink.substr(1)).style.display = 'none';
-			}
-		}
-	};
-
-	for (var i = 0, len = tabs.length; i < len; i++) {
-		tab = tabs[i];
-		tab.onclick = alternativeLinkClicked;
-
-		if (loadOnStart === '') {
-			loadOnStart = tab.getAttribute('href');
-		}
-		if (tab.innerHTML === 'text/html') {
-			loadOnStart = tab.getAttribute('href');
-		}
-	}
-
-	if (loadOnStart !== '') {
-		alternativeLinkActivated(loadOnStart);
-	}
-//]]>
-	</script>
-{% endblock %}
-
-{% block object-tools %}
+{{ block.super }}
+{% with object=adminform.form.instance %}
+{% if object.pk %}
+	<ul id="alternatives_switch" class="nav nav-tabs">
+		{% spaceless %}
+			{% for ctype, alternative in object.parsed_message.alternatives_annotated %}
+				<li><a href="{{ alternative.alternative_url }}">{{ ctype }}</a></li>
+			{% endfor %}
+			<li><a href="#data">data</a></li>
+		{% endspaceless %}
+	</ul>
+{% endif %}
+{% endwith %}
 {% endblock %}

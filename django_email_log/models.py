@@ -6,7 +6,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_str
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 
 class EmailManager(models.Manager):
@@ -26,28 +26,39 @@ class EmailManager(models.Manager):
 class Email(models.Model):
 	objects = EmailManager()
 
-	subject = models.TextField(verbose_name=_("subject"))
-	body = models.TextField(verbose_name=_("body"))
-	email_from = models.TextField(verbose_name=_("sender"))
-	email_to = models.TextField(verbose_name=_("recipients"))
-	message_data = models.TextField(verbose_name=_("message data"))
+	STATUS_PENDING = 'p'
+	STATUS_SUCCESS = 's'
+	STATUS_FAIL = 'f'
+	STATUS_RECEIVED = 'r'
+	STATUS_CHOICES = (
+		(STATUS_PENDING, pgettext_lazy('email message status', "Pending")),
+		(STATUS_SUCCESS, pgettext_lazy('email message status', "Success")),
+		(STATUS_FAIL, pgettext_lazy('email message status', "Fail")),
+		(STATUS_RECEIVED, pgettext_lazy('email message status', "Received")),
+	)
 
-	date_sent = models.DateTimeField(verbose_name=_("date sent"), editable=False, db_index=True)
-	success = models.BooleanField(verbose_name=_("successfully sent"), null=True, db_index=True)
-	readed = models.BooleanField(verbose_name=_("message readed"), blank=True, default=False, db_index=True)
+	subject = models.TextField(verbose_name=pgettext_lazy('email message', "subject"))
+	body = models.TextField(verbose_name=pgettext_lazy('email message', "body"))
+	email_from = models.TextField(verbose_name=pgettext_lazy('email message', "sender"))
+	email_to = models.TextField(verbose_name=pgettext_lazy('email message', "recipients"))
+	message_data = models.TextField(verbose_name=pgettext_lazy('email message', "data"))
+
+	date_sent = models.DateTimeField(verbose_name=pgettext_lazy('email message', "date sent"), editable=False, db_index=True)
+	status = models.CharField(verbose_name=pgettext_lazy('email message', "status"), max_length=1, default=STATUS_PENDING, choices=STATUS_CHOICES, db_index=True)
+	readed = models.BooleanField(verbose_name=pgettext_lazy('email message', "readed"), blank=True, default=False, db_index=True)
 
 	def __str__(self):
 		return self.subject
 
 	class Meta:
-		verbose_name = _("e-mail message")
-		verbose_name_plural = _("e-mail messages")
+		verbose_name = pgettext_lazy('email message noun', "e-mail message")
+		verbose_name_plural = pgettext_lazy('email message noun plural', "e-mail messages")
 		ordering = ('-date_sent',)
 
 	def save(self, *args, **kwargs):
 		if not self.id and not self.date_sent:
 			self.date_sent = timezone.now()
-		return super(Email, self).save(*args, **kwargs)
+		return super().save(*args, **kwargs)
 
 	@property
 	def parsed_message(self):
