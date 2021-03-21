@@ -33,7 +33,8 @@ class Email(models.Model):
 	message_data = models.TextField(verbose_name=_("message data"))
 
 	date_sent = models.DateTimeField(verbose_name=_("date sent"), editable=False, db_index=True)
-	success = models.BooleanField(verbose_name=_("successfully sent"), default=False, db_index=True)
+	success = models.BooleanField(verbose_name=_("successfully sent"), null=True, db_index=True)
+	readed = models.BooleanField(verbose_name=_("message readed"), blank=True, default=False, db_index=True)
 
 	def __str__(self):
 		return self.subject
