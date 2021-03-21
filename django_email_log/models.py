@@ -33,7 +33,7 @@ class EmailManager(models.Manager):
 		msg = message.message()
 		db_message.email_from = msg.get('From', '')
 		db_message.email_to = msg.get('To', '')
-		db_message.message_data = msg.as_string()
+		db_message.message_data = msg.as_bytes()
 		if commit:
 			db_message.save()
 		return db_message
@@ -57,7 +57,7 @@ class Email(models.Model):
 	body = models.TextField(verbose_name=pgettext_lazy('email message', "body"))
 	email_from = models.TextField(verbose_name=pgettext_lazy('email message', "sender"))
 	email_to = models.TextField(verbose_name=pgettext_lazy('email message', "recipients"))
-	message_data = models.TextField(verbose_name=pgettext_lazy('email message', "data"))
+	message_data = models.BinaryField(verbose_name=pgettext_lazy('email message', "data"))
 
 	date_sent = models.DateTimeField(verbose_name=pgettext_lazy('email message', "date sent"), editable=False, db_index=True)
 	status = models.CharField(verbose_name=pgettext_lazy('email message', "status"), max_length=1, default=STATUS_PENDING, choices=STATUS_CHOICES, db_index=True)
@@ -78,7 +78,7 @@ class Email(models.Model):
 
 	@property
 	def parsed_message(self):
-		return email.message_from_bytes(self.message_data.encode('utf-8'))
+		return email.message_from_bytes(self.message_data.tobytes())
 
 	@property
 	def payload_tree(self):

@@ -53,4 +53,9 @@ class Migration(migrations.Migration):
 			name='message_data',
 			field=models.TextField(verbose_name='data'),
 		),
+		migrations.AlterField(
+			model_name='email',
+			name='message_data',
+			field=models.BinaryField(),
+		),
 	]
