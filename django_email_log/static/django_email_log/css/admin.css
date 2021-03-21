@@ -1,3 +1,25 @@
+.email-log-parts ul {
+	padding: 0;
+	margin: 0 0 0 1em;
+	list-style: none;
+}
+
+.email-log-parts li {
+	padding: 0;
+	margin: 0;
+	list-style-type: none;
+	line-height: 1.4;
+}
+
+.email-log-parts ul .content-disposition-inline > a {
+	opacity: .2;
+	font-size: 80%;
+}
+
+#email_form .field-subject .readonly {
+	font-weight: bold;
+}
+
 #alternatives_switch {
 	list-style: none;
 	padding: 0;
@@ -53,6 +75,8 @@
 	background: #417690;
 }
 
+/*
+
 pre.alternative, iframe.alternative {
 	border: none;
 	background: #f8f8f8;
@@ -61,3 +85,4 @@ pre.alternative, iframe.alternative {
 	margin: 0;
 	width: 100%;
 }
+*/

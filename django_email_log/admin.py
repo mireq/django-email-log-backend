@@ -11,8 +11,8 @@ class EmailAdmin(admin.ModelAdmin):
 	list_display = ('subject', 'get_recipients', 'date_sent', 'status')
 	list_filter = ('date_sent', 'status', 'readed')
 	search_fields = ('subject', 'email_to')
-	readonly_fields = ('subject', 'body', 'email_from', 'email_to', 'message_data', 'date_sent', 'status', 'readed')
-	fields = ('subject', 'email_from', 'email_to', 'date_sent', 'status')
+	readonly_fields = ('body', 'email_from', 'email_to', 'message_data', 'date_sent', 'status', 'readed')
+	fields = ('email_from', 'email_to', 'date_sent', 'status')
 
 	def get_recipients(self, obj):
 		return Truncator(obj.email_to).chars(40, truncate="...")

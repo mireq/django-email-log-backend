@@ -1,0 +1,12 @@
+{% if tree %}
+	<li class="content-disposition-{{ tree.content_disposition }}">
+		<a href="{{ tree.absolute_url }}" target="_blank">{% if tree.filename %}{{ tree.filename }}{% else %}{{ tree.content_type }}{% endif %}</a>
+		{% if tree.children %}
+			{% for child in tree.children %}
+				<ul>
+					{% include "admin/django_email_log/email/part_tree.html" with tree=child %}
+				</ul>
+			{% endfor %}
+		{% endif %}
+	</li>
+{% endif %}

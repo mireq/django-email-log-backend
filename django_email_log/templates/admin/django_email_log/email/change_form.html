@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block object-tools %}{% endblock %}
+{% block content_title %}{% if adminform.form.instance.pk %}<h1>{{ adminform.form.instance.subject }}</h1>{% else %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block field_sets %}
 {{ block.super }}
@@ -18,9 +19,23 @@
 			{% for ctype, alternative in object.parsed_message.alternatives_annotated %}
 				<li><a href="{{ alternative.alternative_url }}">{{ ctype }}</a></li>
 			{% endfor %}
+			{% for alternative in object.alternatives %}
+				<li>
+					<a href="{{ alternative.alternative_url }}">{% if alternative.filename %}{{ alternative.filename }}{% else %}{{ alternative.content_type }}{% endif %}</a>
+				</li>
+			{% endfor %}
 			<li><a href="#data">data</a></li>
 		{% endspaceless %}
 	</ul>
+
+	<fieldset class="module">
+		<h2>{% trans "E-mail structure" context "email message" %}</h2>
+		<div class="email-log-parts">
+			<ul>
+				{% include "admin/django_email_log/email/part_tree.html" with tree=object.payload_tree %}
+			</ul>
+		</div>
+	</fieldset>
 {% endif %}
 {% endwith %}
 {% endblock %}
