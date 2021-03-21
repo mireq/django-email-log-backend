@@ -16,7 +16,7 @@ class AttachmentView(View):
 			return HttpResponseForbidden()
 		email = get_object_or_404(Email, pk=kwargs['pk'])
 		msg = email.parsed_message
-		number = int(kwargs['nr'])
+		number = int(kwargs.get('nr', '0'))
 		if number > len(msg['parts']):
 			raise Http404()
 		part = msg['parts'][number]
