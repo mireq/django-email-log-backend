@@ -7,11 +7,22 @@ from django.core.mail import EmailMultiAlternatives
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.encoding import force_str
 from django.utils.translation import pgettext_lazy
 
 
 PartInfo = namedtuple('PartInfo', ['part', 'content_type', 'content_disposition', 'filename', 'cid', 'absolute_url', 'alternative_url'])
+
+
+class EmailRawMessage(EmailMultiAlternatives):
+	def __init__(self, raw, *args, **kwargs):
+		self.__raw = raw
+		super().__init__(*args, **kwargs)
+
+	def _create_message(self, msg): # pylint: disable=unused-argument
+		return self.__raw
+
+	def message(self):
+		return self._create_message(None)
 
 
 class EmailManager(models.Manager):
@@ -67,7 +78,7 @@ class Email(models.Model):
 
 	@property
 	def parsed_message(self):
-		return email.message_from_string(force_str(self.message_data))
+		return email.message_from_bytes(self.message_data.encode('utf-8'))
 
 	@property
 	def payload_tree(self):
@@ -122,36 +133,10 @@ class Email(models.Model):
 	@property
 	def email_message(self):
 		msg = self.parsed_message
-		attachments = []
-		alternatives = []
-		headers = {}
-		skip_headers = {
-			'Subject', 'From', 'To', 'Bcc', 'Cc',
-			'Reply-To', 'Date',
-			'Message-ID', 'Content-Type', 'MIME-Version'
-		}
-
-		for part in msg['attachments']:
-			attachments.append((part.get_filename(), part.get_payload(decode=True), part.get_content_type()))
-		for part in msg['alternatives']:
-			if not getattr(part, 'is_body', False):
-				alternatives.append((part.get_payload(decode=True), part.get_content_type()))
-		for hdr, value in msg['headers'].items():
-			if hdr not in skip_headers:
-				headers[hdr] = value
-
-		email_instance = EmailMultiAlternatives(
-			subject=msg['headers']['Subject'],
-			body=msg['body'] or '',
-			from_email=msg['headers'].get('From'),
-			to=msg['headers']['To'].split(', ') if 'To' in msg['headers'] else None,
-			bcc=msg['headers']['Bcc'].split(', ') if 'Bcc' in msg['headers'] else None,
-			cc=msg['headers']['Cc'].split(', ') if 'Cc' in msg['headers'] else None,
-			reply_to=msg['headers']['Reply-To'].split(', ') if 'Reply-To' in msg['headers'] else None,
-			attachments=attachments or None,
-			alternatives=alternatives or None,
-			headers=headers or None,
+		email_instance = EmailRawMessage(
+			raw=msg,
+			from_email=msg.get('From'),
+			to=msg['To'].split(', ') if 'To' in msg else None
 		)
 		setattr(email_instance, 'model_instance', self)
-
 		return email_instance
