@@ -52,7 +52,7 @@ with open('README.rst', 'r') as fh:
 
 setuptools.setup(
 	name='django-email-log-backend',
-	version='0.3rc1',
+	version='0.3',
 	author='Miroslav Bendík',
 	author_email='miroslav.bendik@gmail.com',
 	description="Django email log backend",
