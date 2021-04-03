@@ -5,14 +5,11 @@ Django database email logger
 Install
 -------
 
-`pip install 'git+https://github.com/mireq/django-email-log-backend.git'`
+`pip install django-email-log-backend`
 
 or
 
 `pip install -e 'git+https://github.com/mireq/django-email-log-backend.git#egg=django_email_log_backend'`
-
-Usage
------
 
 Settings
 ^^^^^^^^
@@ -37,6 +34,11 @@ Emails are forwarded to `EMAIL_LOG_BACKEND`.
 		url(r'^django-email-log/', include('django_email_log.urls')),
 	]
 
-.. image:: https://raw.github.com/wiki/mireq/django-email-log-backend/msg1.png
+Screenshots
+^^^^^^^^^^^
 
-.. image:: https://raw.github.com/wiki/mireq/django-email-log-backend/msg2.png
+.. image:: https://raw.github.com/wiki/mireq/django-email-log-backend/msg1.png?v2020-04-03
+
+.. image:: https://raw.github.com/wiki/mireq/django-email-log-backend/msg2.png?v2020-04-03
+
+.. image:: https://raw.github.com/wiki/mireq/django-email-log-backend/msg3.png?v2020-04-03
