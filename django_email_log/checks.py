@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django.core.checks import Warning
+from django.core.checks import Warning # pylint: disable=redefined-builtin
 from django.utils.module_loading import import_string
 
 from .utils import get_status_handler
