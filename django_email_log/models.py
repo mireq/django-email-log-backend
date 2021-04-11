@@ -78,7 +78,7 @@ class Email(models.Model):
 
 	@property
 	def parsed_message(self):
-		return email.message_from_bytes(self.message_data.tobytes())
+		return email.message_from_bytes(bytes(self.message_data))
 
 	@property
 	def payload_tree(self):
