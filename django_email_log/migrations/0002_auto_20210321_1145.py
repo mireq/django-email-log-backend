@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 from django.db.models import Case, When, Q, Value as V, F
+from django.db.models.functions import Cast, Replace
 
 
 def transform_success_to_status(apps, schema_editor):
@@ -24,6 +25,18 @@ def transform_status_to_success(apps, schema_editor):
 		default=V(True), output_field=bool_field
 	)
 	Email.objects.using(db_alias).annotate(new_value=transform).update(success=F('new_value'))
+
+
+def copy_message_data(apps, schema_editor):
+	db_alias = schema_editor.connection.alias
+	Email = apps.get_model('django_email_log.Email')
+	Email.objects.using(db_alias).update(message_data_tmp=Cast(Replace('message_data', V('\\'), V('\\\\')), output_field=models.BinaryField()))
+
+
+def uncopy_message_data(apps, schema_editor):
+	db_alias = schema_editor.connection.alias
+	Email = apps.get_model('django_email_log.Email')
+	Email.objects.using(db_alias).update(message_data=F('message_data_tmp'))
 
 
 class Migration(migrations.Migration):
@@ -52,6 +65,21 @@ class Migration(migrations.Migration):
 			model_name='email',
 			name='message_data',
 			field=models.TextField(verbose_name='data'),
+		),
+		migrations.AddField(
+			model_name='email',
+			name='message_data_tmp',
+			field=models.BinaryField(default=b''),
+		),
+		migrations.RunPython(copy_message_data, uncopy_message_data),
+		migrations.RemoveField(
+			model_name='email',
+			name='message_data',
+		),
+		migrations.RenameField(
+			model_name='email',
+			old_name='message_data_tmp',
+			new_name='message_data',
 		),
 		migrations.AlterField(
 			model_name='email',
