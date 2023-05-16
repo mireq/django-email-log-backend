@@ -31,7 +31,7 @@ Emails are forwarded to `EMAIL_LOG_BACKEND`.
 	# urls.py
 	urlpatterns = [
 		# ...
-		url(r'^django-email-log/', include('django_email_log.urls')),
+		path('django-email-log/', include('django_email_log.urls')),
 	]
 
 Screenshots
