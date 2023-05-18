@@ -3,5 +3,6 @@ __pycache__
 *.py~
 *.swp
 *.mo
+.eggs
 /django_email_log_backend.egg-info/
 /dist/
