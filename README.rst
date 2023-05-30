@@ -5,11 +5,15 @@ Django database email logger
 Install
 -------
 
-`pip install django-email-log-backend`
+.. code:: bash
+
+	pip install django-email-log-backend
 
 or
 
-`pip install -e 'git+https://github.com/mireq/django-email-log-backend.git#egg=django_email_log_backend'`
+.. code:: bash
+
+	pip install -e 'git+https://github.com/mireq/django-email-log-backend.git#egg=django_email_log_backend'
 
 Settings
 ^^^^^^^^
