@@ -25,7 +25,10 @@ class DjceleryEmailTask(celery.Task):
 			Email.objects.filter(pk=kwargs['email_id']).update(status=email_status)
 
 	def delay(self, *args, **kwargs):
-		email_id = current_message.get().pk
+		email_id = 0
+		email = current_message.get()
+		if email is not None:
+			email_id = email.pk
 		kwargs['email_id'] = email_id
 		return super().delay(*args, **kwargs)
 

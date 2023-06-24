@@ -33,7 +33,8 @@ class EmailBackend(BaseEmailBackend):
 				num_sent += self.process_status(message.send(), email)
 			except Exception:
 				logger.exception("Wrong e-mail status value", extra={'value': num_sent})
-			email.save()
+			if email is not None:
+				email.save()
 		return num_sent
 
 	def get_email_instance(self, message):
@@ -50,5 +51,6 @@ class EmailBackend(BaseEmailBackend):
 					date_sent=timezone.now(),
 					status=Email.STATUS_FAIL
 				)
-		model_instance.original_message = message
+		if model_instance is not None:
+			model_instance.original_message = message
 		return model_instance
