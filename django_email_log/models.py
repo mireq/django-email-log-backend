@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
-import cgi
 import email
 
 from django.core.mail import EmailMultiAlternatives
@@ -98,9 +97,39 @@ class Email(models.Model):
 		self.__build_tree(self.parsed_message, state['tree'], state, add_to_alternative=True)
 		return state
 
+	def __parseparam(self, s):
+		while s[:1] == ';':
+			s = s[1:]
+			end = s.find(';')
+			while end > 0 and (s.count('"', 0, end) - s.count('\\"', 0, end)) % 2:
+				end = s.find(';', end + 1)
+			if end < 0:
+				end = len(s)
+			f = s[:end]
+			yield f.strip()
+			s = s[end:]
+
+	def __parse_content_disposition(self, line):
+		"""
+		From removed cgi module
+		"""
+		parts = self.__parseparam(';' + line)
+		key = parts.__next__()
+		pdict = {}
+		for p in parts:
+			i = p.find('=')
+			if i >= 0:
+				name = p[:i].strip().lower()
+				value = p[i+1:].strip()
+				if len(value) >= 2 and value[0] == value[-1] == '"':
+					value = value[1:-1]
+					value = value.replace('\\\\', '\\').replace('\\"', '"')
+				pdict[name] = value
+		return key, pdict
+
 	def __build_tree(self, part, tree, state, add_to_alternative):
 		parts, alternatives = state['parts'], state['alternatives']
-		content_disposition, params = cgi.parse_header(part.get('Content-Disposition', ''))
+		content_disposition, params = self.__parse_content_disposition(part.get('Content-Disposition', ''))
 		filename = params.get('filename')
 		content_disposition = content_disposition or 'inline'
 		content_type = part.get_content_type()
