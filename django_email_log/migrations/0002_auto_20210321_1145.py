@@ -46,6 +46,8 @@ def copy_message_data(apps, schema_editor):
 				logger.warning("SQL command failed:\n%s\n" % cmd)
 				transaction.rollback()
 		Email.objects.using(db_alias).update(message_data_tmp=Cast(Replace('message_data', V('\\'), V('\\\\')), output_field=models.BinaryField()))
+	elif schema_editor.connection.vendor == 'mysql':
+		Email.objects.using(db_alias).update(message_data_tmp=F('message_data'))
 	else:
 		Email.objects.using(db_alias).update(message_data_tmp=Cast('message_data', output_field=models.BinaryField()))
 
